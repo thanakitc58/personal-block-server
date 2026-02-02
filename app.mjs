@@ -266,8 +266,9 @@ app.delete("/posts/:postId", async (req, res) => {
     return res.status(200).json({
       message: "Deleted post successfully",
     });
-  } catch {
+  } catch(error) {
     return res.status(500).json({
+      error,
       message: `Server could not delete post because database connection`,
     });
   }
