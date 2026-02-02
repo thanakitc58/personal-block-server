@@ -1,12 +1,14 @@
-
+import "dotenv/config";
 import * as pg from "pg";
+
 const { Pool } = pg.default;
 
-const connectionPool = new Pool({
-  // ตรงนี้ต้องเปลี่ยน connectionString เป็นของตัวเองด้วยนะ
-  connectionString:
-  "postgresql://postgres:0994672558Za@db.vzteohhdvktixczlyjan.supabase.co:5432/postgres",
+// local: ใช้จาก .env | Vercel: ตั้ง CONNECTION_STRING ใน Project Settings → Environment Variables
+const connectionString = process.env.CONNECTION_STRING;
 
+const connectionPool = new Pool({
+  connectionString,
+  ssl: connectionString?.includes("supabase") ? { rejectUnauthorized: false } : undefined,
 });
 
 export default connectionPool;
