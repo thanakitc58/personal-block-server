@@ -1,16 +1,19 @@
-
+      
 {
-    "version": 2,
-    "builds": [
-      {
-        "src": "app.mjs",
-        "use": "@vercel/node"
-      }
-    ],
-    "routes": [
-      {
-        "src": "/(.*)",
-        "dest": "app.mjs"
-      }
-    ]
-  }   
+  "version": 2,
+  "builds": [
+    {
+      "src": "app.mjs",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "app.mjs"
+    }
+  ],
+  "env": {
+    "CONNECTION_STRING": "postgresql://postgres:0994672558Za@db.vzteohhdvktixczlyjan.supabase.co:5432/postgres"
+  }
+}

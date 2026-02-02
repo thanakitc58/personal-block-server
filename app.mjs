@@ -1,3 +1,4 @@
+import "dotenv/config";
 import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
@@ -9,6 +10,15 @@ const port = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
+//test vercel
+app.get("/profiles", (req, res) => {
+  return res.json({
+    data: {
+      name: "john",
+      age: 20,
+    },
+  });
+});
 //นักเขียนสามารถสร้างบทความใหม่ขึ้นมาได้ในระบบ
 app.post("/posts", async (req, res) => {
   // ลอจิกในการเก็บข้อมูลของโพสต์ลงในฐานข้อมูล
@@ -36,6 +46,15 @@ app.post("/posts", async (req, res) => {
   }
   // 3) Return ตัว Response กลับไปหา Client ว่าสร้างสำเร็จ
   return res.status(201).json({ message: "Created post successfully" });
+});
+
+app.get("/profiles", (req, res) => {
+  return res.json({
+    data: {
+      name: "john",
+      age: 20,
+    },
+  });
 });
 
 //นักเขียนสามารถดูข้อมูลบทความอันเดียวได้
