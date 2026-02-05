@@ -7,7 +7,15 @@ import connectionPool from "./util/db.mjs";
 const app = express();
 const port = process.env.PORT || 4000;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173", // Frontend local (Vite)
+      "http://localhost:3000", // Frontend local (React อื่นๆ)
+      "https://dog-block-bark-git-feature-member-management-pongzaps-projects.vercel.app/", // Frontend ที่ deploy แล้ว
+    ],
+  })
+);
 app.use(express.json());
 
 //test vercel
