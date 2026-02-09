@@ -11,7 +11,7 @@ app.use(
     origin: [
       "http://localhost:5173", // Frontend local (Vite)
       "http://localhost:3000", // Frontend local (React อื่นๆ)
-      "https://dog-block-bark-git-feature-member-management-pongzaps-projects.vercel.app/", // Frontend ที่ deploy แล้ว
+      "https://dog-block-bark-git-dev-pongzaps-projects.vercel.app/", // Frontend ที่ deploy แล้ว
     ],
   })
 );
