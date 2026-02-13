@@ -4,6 +4,9 @@ import {
   getPostById,
   updatePost,
   deletePost,
+  likePost,
+  unlikePost,
+  getLikeStatus,
 } from "../services/postsService.mjs";
 
 export async function handleCreatePost(req, res) {
@@ -88,6 +91,61 @@ export async function handleDeletePost(req, res) {
       error,
       message: "Server could not delete post because database connection",
     });
+  }
+}
+
+export async function handleLikePost(req, res) {
+  const postId = req.params.postId;
+  const userId = req.user?.id;
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  try {
+    const post = await getPostById(postId);
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+    const result = await likePost(userId, postId);
+    const postAfter = await getPostById(postId);
+    return res.status(200).json({
+      liked: true,
+      count: postAfter?.likes_count ?? 0,
+      alreadyLiked: result.alreadyLiked,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to like post" });
+  }
+}
+
+export async function handleUnlikePost(req, res) {
+  const postId = req.params.postId;
+  const userId = req.user?.id;
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  try {
+    await unlikePost(userId, postId);
+    const postAfter = await getPostById(postId);
+    return res.status(200).json({
+      liked: false,
+      count: postAfter?.likes_count ?? 0,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to unlike post" });
+  }
+}
+
+export async function handleGetLikeStatus(req, res) {
+  const postId = req.params.postId;
+  const userId = req.user?.id;
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  try {
+    const status = await getLikeStatus(userId, postId);
+    return res.status(200).json(status);
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to get like status" });
   }
 }
 

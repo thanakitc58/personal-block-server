@@ -6,6 +6,11 @@ import {
   updatePost as updatePostInRepo,
   deletePost as deletePostInRepo,
 } from "../repositories/postsRepository.mjs";
+import {
+  addLike as addLikeInRepo,
+  removeLike as removeLikeInRepo,
+  hasLiked as hasLikedInRepo,
+} from "../repositories/likesRepository.mjs";
 
 export async function createPost(postData) {
   await createPostInRepo(postData);
@@ -51,5 +56,24 @@ export async function updatePost(postId, postData) {
 
 export async function deletePost(postId) {
   await deletePostInRepo(postId);
+}
+
+export async function likePost(userId, postId) {
+  const inserted = await addLikeInRepo(userId, postId);
+  return { liked: true, alreadyLiked: !inserted };
+}
+
+export async function unlikePost(userId, postId) {
+  const removed = await removeLikeInRepo(userId, postId);
+  return { liked: false, removed };
+}
+
+export async function getLikeStatus(userId, postId) {
+  const [liked, post] = await Promise.all([
+    hasLikedInRepo(userId, postId),
+    getPostByIdFromRepo(postId),
+  ]);
+  const count = post ? (post.likes_count ?? 0) : 0;
+  return { liked, count };
 }
 
