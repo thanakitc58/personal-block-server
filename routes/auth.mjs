@@ -4,7 +4,9 @@ import {
   login,
   getUser,
   handleResetPassword,
+  handleUpdateProfile,
 } from "../controllers/authController.mjs";
+import uploadAvatar from "../middleware/uploadAvatar.mjs";
 
 const authRouter = Router();
 
@@ -13,5 +15,11 @@ authRouter.post("/register", register);
 authRouter.post("/login", login);
 authRouter.get("/get-user", getUser);
 authRouter.put("/reset-password", handleResetPassword);
+authRouter.put("/profile", (req, res, next) => {
+  uploadAvatar(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    next();
+  });
+}, handleUpdateProfile);
 
 export default authRouter;

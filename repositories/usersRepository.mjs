@@ -33,3 +33,15 @@ export async function findById(id) {
   return rows[0] || null;
 }
 
+export async function updateProfilePic(userId, profilePicUrl) {
+  const query = `
+    UPDATE users
+    SET profile_pic = $1
+    WHERE id = $2
+    RETURNING *;
+  `;
+  const values = [profilePicUrl, userId];
+  const { rows } = await connectionPool.query(query, values);
+  return rows[0] || null;
+}
+

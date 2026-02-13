@@ -1,8 +1,8 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import postsRouter from "./routers/posts.mjs";
 import authRouter from "./routes/auth.mjs";
+import postsRouter from "./routes/posts.mjs";
 import protectUser from "./middleware/protectUser.mjs";
 import protectAdmin from "./middleware/protectAdmin.mjs";
 

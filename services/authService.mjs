@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { findByUsername, createUser, findById } from "../repositories/usersRepository.mjs";
+import { findByUsername, createUser, findById, updateProfilePic } from "../repositories/usersRepository.mjs";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -85,13 +85,56 @@ export async function getUserFromToken(token) {
     throw createServiceError(404, "User not found");
   }
 
+  const profilePic = userRow.profile_pic ?? null;
   return {
     id: data.user.id,
     email: data.user.email,
     username: userRow.username,
     name: userRow.name,
     role: userRow.role,
-    profilePic: userRow.profile_pic,
+    profilePic,
+    avatar: profilePic,
+  };
+}
+
+export async function updateUserProfile(token, file) {
+  const { data, error } = await supabase.auth.getUser(token);
+
+  if (error) {
+    throw createServiceError(401, "Unauthorized or token expired");
+  }
+
+  const userId = data.user.id;
+  const ext = file.mimetype?.split("/")[1] || "jpg";
+  const filePath = `${userId}/${Date.now()}.${ext}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("my-personal-block")
+    .upload(filePath, file.buffer, {
+      contentType: file.mimetype,
+      upsert: true,
+    });
+
+  if (uploadError) {
+    throw createServiceError(400, uploadError.message || "Failed to upload image");
+  }
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("my-personal-block").getPublicUrl(filePath);
+
+  await updateProfilePic(userId, publicUrl);
+  const userRow = await findById(userId);
+
+  const profilePic = userRow?.profile_pic ?? null;
+  return {
+    id: data.user.id,
+    email: data.user.email,
+    username: userRow?.username,
+    name: userRow?.name,
+    role: userRow?.role,
+    profilePic,
+    avatar: profilePic,
   };
 }
 
