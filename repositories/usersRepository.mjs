@@ -45,3 +45,36 @@ export async function updateProfilePic(userId, profilePicUrl) {
   return rows[0] || null;
 }
 
+export async function updateProfileInfo(userId, { name, username }) {
+  const updates = [];
+  const values = [];
+  let i = 1;
+  if (name !== undefined) {
+    updates.push(`name = $${i++}`);
+    values.push(name);
+  }
+  if (username !== undefined) {
+    updates.push(`username = $${i++}`);
+    values.push(username);
+  }
+  if (updates.length === 0) return findById(userId);
+  values.push(userId);
+  const query = `
+    UPDATE users
+    SET ${updates.join(", ")}
+    WHERE id = $${i}
+    RETURNING *;
+  `;
+  const { rows } = await connectionPool.query(query, values);
+  return rows[0] || null;
+}
+
+export async function findByIdNotEqual(id, username) {
+  const query = `
+    SELECT id FROM users
+    WHERE username = $1 AND id != $2
+  `;
+  const { rows } = await connectionPool.query(query, [username, id]);
+  return rows;
+}
+

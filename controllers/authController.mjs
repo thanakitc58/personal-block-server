@@ -4,6 +4,7 @@ import {
   getUserFromToken,
   resetPassword,
   updateUserProfile,
+  updateProfileInfoByToken,
 } from "../services/authService.mjs";
 
 export async function register(req, res) {
@@ -97,6 +98,25 @@ export async function handleUpdateProfile(req, res) {
 
   try {
     const user = await updateUserProfile(token, req.file);
+    return res.status(200).json({ user });
+  } catch (error) {
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function handleUpdateProfileInfo(req, res) {
+  const token = req.headers.authorization?.split(" ")[1];
+  const { name, username } = req.body;
+
+  if (!token) {
+    return res.status(401).json({ error: "Unauthorized: Token missing" });
+  }
+
+  try {
+    const user = await updateProfileInfoByToken(token, { name, username });
     return res.status(200).json({ user });
   } catch (error) {
     if (error.statusCode) {

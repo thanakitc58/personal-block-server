@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { findByUsername, createUser, findById, updateProfilePic } from "../repositories/usersRepository.mjs";
+import { findByUsername, createUser, findById, updateProfilePic, updateProfileInfo, findByIdNotEqual } from "../repositories/usersRepository.mjs";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -133,6 +133,39 @@ export async function updateUserProfile(token, file) {
     username: userRow?.username,
     name: userRow?.name,
     role: userRow?.role,
+    profilePic,
+    avatar: profilePic,
+  };
+}
+
+export async function updateProfileInfoByToken(token, { name, username }) {
+  const { data, error } = await supabase.auth.getUser(token);
+
+  if (error) {
+    throw createServiceError(401, "Unauthorized or token expired");
+  }
+
+  const userId = data.user.id;
+
+  if (username !== undefined && username !== null && username !== "") {
+    const existing = await findByIdNotEqual(userId, username);
+    if (existing.length > 0) {
+      throw createServiceError(400, "This username is already taken");
+    }
+  }
+
+  const userRow = await updateProfileInfo(userId, { name, username });
+  if (!userRow) {
+    throw createServiceError(404, "User not found");
+  }
+
+  const profilePic = userRow.profile_pic ?? null;
+  return {
+    id: data.user.id,
+    email: data.user.email,
+    username: userRow.username,
+    name: userRow.name,
+    role: userRow.role,
     profilePic,
     avatar: profilePic,
   };
