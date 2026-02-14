@@ -10,6 +10,8 @@ import {
   handleLikePost,
   handleUnlikePost,
   handleGetLikeStatus,
+  handleGetComments,
+  handleCreateComment,
 } from "../controllers/postsController.mjs";
 
 const router = express.Router();
@@ -21,6 +23,9 @@ router.get("/", handleGetPosts);
 router.get("/:postId/like", protectUser, handleGetLikeStatus);
 router.post("/:postId/like", protectUser, handleLikePost);
 router.delete("/:postId/like", protectUser, handleUnlikePost);
+// Comment routes
+router.get("/:postId/comments", handleGetComments);
+router.post("/:postId/comments", protectUser, handleCreateComment);
 router.get("/:postId", handleGetPostById);
 router.put("/:postId", validatePostData, handleUpdatePost);
 router.delete("/:postId", handleDeletePost);

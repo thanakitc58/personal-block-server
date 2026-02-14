@@ -8,6 +8,10 @@ import {
   unlikePost,
   getLikeStatus,
 } from "../services/postsService.mjs";
+import {
+  getCommentsByPostId,
+  createComment,
+} from "../repositories/commentsRepository.mjs";
 
 export async function handleCreatePost(req, res) {
   const newPost = req.body;
@@ -146,6 +150,48 @@ export async function handleGetLikeStatus(req, res) {
     return res.status(200).json(status);
   } catch (error) {
     return res.status(500).json({ error: "Failed to get like status" });
+  }
+}
+
+export async function handleGetComments(req, res) {
+  const postId = req.params.postId;
+  try {
+    const post = await getPostById(postId);
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+    const comments = await getCommentsByPostId(postId);
+    return res.status(200).json({ comments });
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to get comments" });
+  }
+}
+
+export async function handleCreateComment(req, res) {
+  const postId = req.params.postId;
+  const userId = req.user?.id;
+  const { content } = req.body;
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  if (!content || typeof content !== "string" || !content.trim()) {
+    return res.status(400).json({ error: "Comment content is required" });
+  }
+
+  try {
+    const post = await getPostById(postId);
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+    const comment = await createComment({
+      postId,
+      userId,
+      content: content.trim(),
+    });
+    return res.status(201).json({ comment });
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to create comment" });
   }
 }
 
