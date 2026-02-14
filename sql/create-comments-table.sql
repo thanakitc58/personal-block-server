@@ -1,0 +1,12 @@
+-- โครงสร้างตาราง comments ตาม DB จริง
+-- คอลัมน์: id (int4), post_id (FK posts), user_id (uuid FK users), comment_text (text), created_at (timestamp)
+
+-- ถ้ายังไม่มีตาราง ให้รัน (ถ้ามีอยู่แล้วไม่ต้องรัน):
+-- CREATE TABLE IF NOT EXISTS comments (
+--   id SERIAL PRIMARY KEY,
+--   post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+--   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+--   comment_text TEXT NOT NULL,
+--   created_at TIMESTAMPTZ DEFAULT NOW()
+-- );
+-- CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments(post_id);

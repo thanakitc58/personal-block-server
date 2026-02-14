@@ -163,7 +163,11 @@ export async function handleGetComments(req, res) {
     const comments = await getCommentsByPostId(postId);
     return res.status(200).json({ comments });
   } catch (error) {
-    return res.status(500).json({ error: "Failed to get comments" });
+    console.error("Get comments error:", error.message);
+    return res.status(500).json({
+      error: "Failed to get comments",
+      detail: process.env.NODE_ENV !== "production" ? error.message : undefined,
+    });
   }
 }
 
@@ -191,7 +195,11 @@ export async function handleCreateComment(req, res) {
     });
     return res.status(201).json({ comment });
   } catch (error) {
-    return res.status(500).json({ error: "Failed to create comment" });
+    console.error("Create comment error:", error.message);
+    return res.status(500).json({
+      error: "Failed to create comment",
+      detail: process.env.NODE_ENV !== "production" ? error.message : undefined,
+    });
   }
 }
 
