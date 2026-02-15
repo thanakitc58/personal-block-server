@@ -12,6 +12,9 @@ import {
   getCommentsByPostId,
   createComment,
 } from "../repositories/commentsRepository.mjs";
+import { getAllCategories } from "../repositories/categoriesRepository.mjs";
+import { getAllStatuses } from "../repositories/statusesRepository.mjs";
+import { uploadToStorage } from "../services/uploadService.mjs";
 
 export async function handleCreatePost(req, res) {
   const newPost = req.body;
@@ -22,6 +25,42 @@ export async function handleCreatePost(req, res) {
   } catch {
     return res.status(500).json({
       message: "Server could not create post because database connection",
+    });
+  }
+}
+
+export async function handleGetCategories(req, res) {
+  try {
+    const categories = await getAllCategories();
+    return res.status(200).json({ categories });
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to get categories" });
+  }
+}
+
+export async function handleGetStatuses(req, res) {
+  try {
+    const statuses = await getAllStatuses();
+    return res.status(200).json({ statuses });
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to get statuses" });
+  }
+}
+
+export async function handleUploadPostImage(req, res) {
+  if (!req.file) {
+    return res.status(400).json({ error: "No image file provided" });
+  }
+  try {
+    const url = await uploadToStorage(
+      req.file.buffer,
+      req.file.mimetype,
+      "posts"
+    );
+    return res.status(200).json({ url });
+  } catch (error) {
+    return res.status(500).json({
+      error: error.message || "Failed to upload image",
     });
   }
 }

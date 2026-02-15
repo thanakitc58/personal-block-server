@@ -1,6 +1,7 @@
 import express from "express";
 import validatePostData from "../middleware/postValidation.mjs";
 import protectUser from "../middleware/protectUser.mjs";
+import uploadPostImage from "../middleware/uploadPostImage.mjs";
 import {
   handleCreatePost,
   handleGetPosts,
@@ -12,6 +13,9 @@ import {
   handleGetLikeStatus,
   handleGetComments,
   handleCreateComment,
+  handleGetCategories,
+  handleGetStatuses,
+  handleUploadPostImage,
 } from "../controllers/postsController.mjs";
 
 const router = express.Router();
@@ -19,6 +23,14 @@ const router = express.Router();
 // Routes: URL + middlewares + controllers
 router.post("/", validatePostData, handleCreatePost);
 router.get("/", handleGetPosts);
+router.get("/categories", handleGetCategories);
+router.get("/statuses", handleGetStatuses);
+router.post("/upload-image", (req, res, next) => {
+  uploadPostImage(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    next();
+  });
+}, handleUploadPostImage);
 // Like routes (more specific) before /:postId
 router.get("/:postId/like", protectUser, handleGetLikeStatus);
 router.post("/:postId/like", protectUser, handleLikePost);
