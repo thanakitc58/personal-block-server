@@ -1,12 +1,13 @@
 import {
-  getNotificationsForUser,
   getRecentPostsAsNotifications,
+  getCommentsOnPostsICommentedOn,
 } from "../repositories/userNotificationsRepository.mjs";
 
 /**
  * GET /auth/notifications - สำหรับ user ที่ login แล้ว
- * คืน: (1) admin โพสบทความใหม่ - จากโพส 7 วันล่าสุด
- *      (2) user อื่น comment ในโพสที่เราเคย comment - จาก user_notifications
+ * ดึงตาม post id โดยตรง ไม่ใช้ตารางใหม่:
+ * (1) โพสใหม่ 7 วันล่าสุด → "Published new article."
+ * (2) comment ในโพสที่เราเคย comment (ดึงจาก comments ตาม post_id) → "Comment on the article you have commented on."
  */
 export async function handleGetMyNotifications(req, res) {
   const userId = req.user?.id;
@@ -14,23 +15,22 @@ export async function handleGetMyNotifications(req, res) {
     return res.status(401).json({ error: "Unauthorized" });
   }
   try {
-    const [storedRows, recentPosts] = await Promise.all([
-      getNotificationsForUser(userId, 30),
+    const [recentPosts, commentRows] = await Promise.all([
       getRecentPostsAsNotifications(10),
+      getCommentsOnPostsICommentedOn(userId, 30),
     ]);
     const list = [];
-    for (const row of storedRows) {
-      const payload = row.payload || {};
+    for (const row of commentRows) {
       list.push({
-        id: `n-${row.id}`,
-        type: row.type,
+        id: `c-${row.comment_id}`,
+        type: "comment_on_my_thread",
         createdAt: row.created_at,
         user: {
-          name: payload.commenter_name,
-          avatar: payload.commenter_avatar,
+          name: row.commenter_name,
+          avatar: row.commenter_avatar,
         },
-        postId: payload.post_id,
-        postTitle: payload.post_title,
+        postId: row.post_id,
+        postTitle: row.post_title,
       });
     }
     for (const p of recentPosts) {

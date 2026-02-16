@@ -12,10 +12,6 @@ import {
   getCommentsByPostId,
   createComment,
 } from "../repositories/commentsRepository.mjs";
-import {
-  getDistinctCommenterUserIdsOnPost,
-  insertUserNotification,
-} from "../repositories/userNotificationsRepository.mjs";
 import { getAllCategories, createCategory } from "../repositories/categoriesRepository.mjs";
 import { getAllStatuses } from "../repositories/statusesRepository.mjs";
 import { uploadToStorage } from "../services/uploadService.mjs";
@@ -250,23 +246,6 @@ export async function handleCreateComment(req, res) {
       userId,
       content: content.trim(),
     });
-    if (comment) {
-      const recipientUserIds = await getDistinctCommenterUserIdsOnPost(postId, userId);
-      const payload = {
-        post_id: parseInt(postId, 10),
-        post_title: post.title,
-        commenter_name: comment.author_name,
-        commenter_avatar: comment.author_avatar,
-        comment_id: comment.id,
-      };
-      for (const uid of recipientUserIds) {
-        try {
-          await insertUserNotification(uid, "comment_on_my_thread", payload);
-        } catch (e) {
-          console.warn("Insert user notification failed:", e.message);
-        }
-      }
-    }
     return res.status(201).json({ comment });
   } catch (error) {
     console.error("Create comment error:", error.message);
