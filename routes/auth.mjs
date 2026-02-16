@@ -7,7 +7,9 @@ import {
   handleUpdateProfile,
   handleUpdateProfileInfo,
 } from "../controllers/authController.mjs";
+import { handleGetMyNotifications } from "../controllers/userNotificationsController.mjs";
 import uploadAvatar from "../middleware/uploadAvatar.mjs";
+import protectUser from "../middleware/protectUser.mjs";
 
 const authRouter = Router();
 
@@ -15,6 +17,7 @@ const authRouter = Router();
 authRouter.post("/register", register);
 authRouter.post("/login", login);
 authRouter.get("/get-user", getUser);
+authRouter.get("/notifications", protectUser, handleGetMyNotifications);
 authRouter.put("/reset-password", handleResetPassword);
 authRouter.patch("/profile", handleUpdateProfileInfo);
 authRouter.put("/profile", (req, res, next) => {

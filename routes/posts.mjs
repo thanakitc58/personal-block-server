@@ -14,6 +14,7 @@ import {
   handleGetComments,
   handleCreateComment,
   handleGetCategories,
+  handleCreateCategory,
   handleGetStatuses,
   handleUploadPostImage,
 } from "../controllers/postsController.mjs";
@@ -24,6 +25,7 @@ const router = express.Router();
 router.post("/", validatePostData, handleCreatePost);
 router.get("/", handleGetPosts);
 router.get("/categories", handleGetCategories);
+router.post("/categories", handleCreateCategory);
 router.get("/statuses", handleGetStatuses);
 router.post("/upload-image", (req, res, next) => {
   uploadPostImage(req, res, (err) => {
