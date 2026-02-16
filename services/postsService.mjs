@@ -16,14 +16,14 @@ export async function createPost(postData) {
   await createPostInRepo(postData);
 }
 
-export async function listPosts({ category, keyword, page, limit }) {
+export async function listPosts({ category, keyword, status, page, limit }) {
   const safePage = Math.max(1, Number(page) || 1);
   const safeLimit = Math.max(1, Math.min(100, Number(limit) || 6));
   const offset = (safePage - 1) * safeLimit;
 
   const [posts, totalPosts] = await Promise.all([
-    getPostsFromRepo({ category, keyword, limit: safeLimit, offset }),
-    countPostsInRepo({ category, keyword }),
+    getPostsFromRepo({ category, keyword, status, limit: safeLimit, offset }),
+    countPostsInRepo({ category, keyword, status }),
   ]);
 
   const results = {

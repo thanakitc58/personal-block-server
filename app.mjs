@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import authRouter from "./routes/auth.mjs";
 import postsRouter from "./routes/posts.mjs";
+import notificationsRouter from "./routes/notifications.mjs";
 import protectUser from "./middleware/protectUser.mjs";
 import protectAdmin from "./middleware/protectAdmin.mjs";
 
@@ -23,6 +24,7 @@ app.use(express.json());
 
 app.use("/posts", postsRouter);
 app.use("/auth", authRouter);
+app.use("/notifications", notificationsRouter);
 
 // Protected routes - require authentication
 app.get("/protected-route", protectUser, (req, res) => {

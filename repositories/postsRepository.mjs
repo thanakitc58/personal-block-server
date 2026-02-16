@@ -18,7 +18,7 @@ export async function createPost(post) {
   await connectionPool.query(query, values);
 }
 
-export async function getPosts({ category, keyword, limit, offset }) {
+export async function getPosts({ category, keyword, status, limit, offset }) {
   let query = `
     SELECT posts.id,
            posts.image,
@@ -34,37 +34,33 @@ export async function getPosts({ category, keyword, limit, offset }) {
     INNER JOIN statuses ON posts.status_id = statuses.id
   `;
 
-  let values = [];
+  const conditions = [];
+  const values = [];
 
-  if (category && keyword) {
-    query += `
-      WHERE categories.name ILIKE $1
-        AND (posts.title ILIKE $2
-          OR posts.description ILIKE $2
-          OR posts.content ILIKE $2)
-    `;
-    values = [`%${category}%`, `%${keyword}%`];
-  } else if (category) {
-    query += " WHERE categories.name ILIKE $1";
-    values = [`%${category}%`];
-  } else if (keyword) {
-    query += `
-      WHERE posts.title ILIKE $1
-         OR posts.description ILIKE $1
-         OR posts.content ILIKE $1
-    `;
-    values = [`%${keyword}%`];
+  if (category) {
+    values.push(`%${category}%`);
+    conditions.push(`categories.name ILIKE $${values.length}`);
+  }
+  if (keyword) {
+    values.push(`%${keyword}%`);
+    conditions.push(`(posts.title ILIKE $${values.length} OR posts.description ILIKE $${values.length} OR posts.content ILIKE $${values.length})`);
+  }
+  if (status) {
+    values.push(`%${status}%`);
+    conditions.push(`statuses.status ILIKE $${values.length}`);
+  }
+  if (conditions.length > 0) {
+    query += " WHERE " + conditions.join(" AND ");
   }
 
-  query += ` ORDER BY posts.date DESC LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
-
   values.push(limit, offset);
+  query += ` ORDER BY posts.date DESC LIMIT $${values.length - 1} OFFSET $${values.length}`;
 
   const result = await connectionPool.query(query, values);
   return result.rows;
 }
 
-export async function countPosts({ category, keyword }) {
+export async function countPosts({ category, keyword, status }) {
   let query = `
     SELECT COUNT(*)
     FROM posts
@@ -72,26 +68,23 @@ export async function countPosts({ category, keyword }) {
     INNER JOIN statuses ON posts.status_id = statuses.id
   `;
 
-  let values = [];
+  const conditions = [];
+  const values = [];
 
-  if (category && keyword) {
-    query += `
-      WHERE categories.name ILIKE $1
-        AND (posts.title ILIKE $2
-          OR posts.description ILIKE $2
-          OR posts.content ILIKE $2)
-    `;
-    values = [`%${category}%`, `%${keyword}%`];
-  } else if (category) {
-    query += " WHERE categories.name ILIKE $1";
-    values = [`%${category}%`];
-  } else if (keyword) {
-    query += `
-      WHERE posts.title ILIKE $1
-         OR posts.description ILIKE $1
-         OR posts.content ILIKE $1
-    `;
-    values = [`%${keyword}%`];
+  if (category) {
+    values.push(`%${category}%`);
+    conditions.push(`categories.name ILIKE $${values.length}`);
+  }
+  if (keyword) {
+    values.push(`%${keyword}%`);
+    conditions.push(`(posts.title ILIKE $${values.length} OR posts.description ILIKE $${values.length} OR posts.content ILIKE $${values.length})`);
+  }
+  if (status) {
+    values.push(`%${status}%`);
+    conditions.push(`statuses.status ILIKE $${values.length}`);
+  }
+  if (conditions.length > 0) {
+    query += " WHERE " + conditions.join(" AND ");
   }
 
   const result = await connectionPool.query(query, values);
@@ -102,11 +95,13 @@ export async function getPostById(postId) {
   const query = `
     SELECT posts.id,
            posts.image,
+           posts.category_id,
            categories.name AS category,
            posts.title,
            posts.description,
            posts.date,
            posts.content,
+           posts.status_id,
            statuses.status,
            posts.likes_count
     FROM posts

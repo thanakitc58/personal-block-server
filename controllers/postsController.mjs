@@ -69,10 +69,11 @@ export async function handleGetPosts(req, res) {
   try {
     const category = req.query.category || "";
     const keyword = req.query.keyword || "";
+    const status = req.query.status || "";
     const page = req.query.page;
     const limit = req.query.limit;
 
-    const results = await listPosts({ category, keyword, page, limit });
+    const results = await listPosts({ category, keyword, status, page, limit });
     return res.status(200).json(results);
   } catch {
     return res.status(500).json({
